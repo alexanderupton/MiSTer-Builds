@@ -1,0 +1,52 @@
+name: Sample MOnSiuerFPGA / MiSTerFPGA Kernel Builder v0.01 - Alexander Upton
+
+on:
+  schedule:
+  - cron: "0 */4 * * *"
+  workflow_dispatch:
+
+jobs:
+  build:
+    env:
+      KERNEL_SRC_URL: https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.15.146.tar.xz
+      KERNEL_SRC_CFG: http://need-to-upload-config-to-github-and-host
+      KERNEL_SRC_VER: 5.15.146
+      ARM_ZIMAGE_PATH: arch/arm/boot/zImage
+      ARM_DTS_PATH: arch/arm/boot/dts/socfpga_cyclone5_de10_nano.dtb
+      DTS_MAKEFILE_URL: https://raw.githubusercontent.com/sithtoast/Linux-Kernel_MiSTer-v5/MiSTer-v5.15/arch/arm/boot/dts/Makefile
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install ARM Cross-Compilation Dependencies
+      run: |
+        sudo apt install libncurses-dev build-essential libncurses-dev bison flex libssl-dev libelf-dev gcc make gcc-arm-linux-gnueabi binutils-arm-linux-gnueabi liblz4-tool unar
+     
+    - name: Install Kernel Compilation Dependencies
+      run: |
+        wget ${KERNEL_SRC_URL}
+        tar -xJf linux-${KERNEL_SRC_VER}.tar.xz
+        wget -O linux-${KERNEL_SRC_VER}/.config ${KERNEL_SRC_CFG_URL}
+
+    - name: Install ARM DTS Makefile - Not sure where else to source this
+      run: |
+        cd linux-${KERNEL_SRC_VER}
+        wget -O ${ARM_DTS_PATH} ${DTS_MAKEFILE_URL} 
+
+    - name: Build zImage and socfpga_cyclone5_de10_nano.dtb
+      run: |
+        cd linux-${KERNEL_SRC_VER}
+        export ARCH=arm
+        export CROSS_COMPILE=arm-linux-gnueabi-
+        export CFLAGS=" -O2 -pipe -mtune=cortex-a9 -g"
+        yes "" | make -j9 zImage socfpga_cyclone5_de10_nano.dtb
+        if [ "$?" == "0" ]; then
+         cat arch/arm/boot/zImage arch/arm/boot/dts/socfpga_cyclone5_de10_nano.dtb > zImage_dtb
+         [[ -f zImage_dtb ]] && echo "Successfully built zImage_dtb" || echo "Failed to build zImage_dtb"
+        else
+         [[ -f ${ARM_ZIMAGE_PATH} ]] && echo "${ARM_ZIMAGE_PATH}: True" || echo "${ARM_ZIMAGE_PATH}: False"
+         [[ -f ${ARM_DTS_PATH} ]] && echo "${ARM_DTS_PATH}: True" || echo "${ARM_DTS_PATH}: False"
+         exit 1
+        fi
