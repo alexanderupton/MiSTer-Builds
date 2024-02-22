@@ -4,6 +4,9 @@ Sample workflow model for cross-compiling a MiSTerFPGA compatible arm64 ARMv7l L
 
 Note: This assumes you will define a ${KERNEL_SRC_CFG_URL} source location variable that points to the respective .config source config location. <br><br>
 
+Note: Build and ARMv7l GCC compilation performance tuning options below have proven to offer some basic system filesystem and network I/O performance. <br> 
+<pre>
 export ARCH=arm <br>
 export CROSS_COMPILE=arm-linux-gnueabi- <br>
 export CFLAGS=" -O2 -pipe -mtune=cortex-a9 -g" <br>
+</pre>
