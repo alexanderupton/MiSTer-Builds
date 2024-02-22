@@ -6,7 +6,7 @@ Note: This assumes you will define a ${KERNEL_SRC_CFG_URL} source location varia
 You can always find a compatible .config file in /proc/config.gz on any live MiSTer system. Simply extract and rename "config" to "linux-${KERNEL_SRC_VER}/.config" 
 
 
-Note: Build and ARMv7l GCC compilation performance tuning options below have proven to offer some basic system filesystem and network I/O performance. <br> 
+Note: Build and ARMv7l GCC compilation performance tuning options below have proven to offer some basic filesystem and network I/O performance improvements. <br> 
 <pre>
 export ARCH=arm <br>
 export CROSS_COMPILE=arm-linux-gnueabi- <br>
